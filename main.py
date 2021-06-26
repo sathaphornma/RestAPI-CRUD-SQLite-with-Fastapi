@@ -3,11 +3,15 @@ from datetime import timedelta
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
 import crud
 import schemas
 
-app = FastAPI()
+app = FastAPI(
+    title="Authentication with FastAPI.",
+    description="This is mini project for create RestAPI, So I will create authentication with fastapi. This project "
+                "using sqlite for database.",
+    version="1.0.1",
+)
 
 
 @app.post("/token", response_model=schemas.Token)
@@ -49,3 +53,8 @@ async def read_users_me(current_user: schemas.User = Depends(crud.get_current_ac
 @app.get("/users/me/items/")
 async def read_own_items(current_user: schemas.User = Depends(crud.get_current_active_user)):
     return [{"Item ID": "IT001", "Owner": current_user.username}]
+
+
+@app.post("/users/me/create-items", response_model=schemas.Item)
+def create_item_for_user(item: schemas.ItemCreate, current_user: schemas.User = Depends(crud.get_current_active_user), db: Session = Depends(crud.get_db)):
+    return crud.create_user_item(user_id=current_user.id, item=item, db=db)
