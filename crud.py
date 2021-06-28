@@ -132,3 +132,32 @@ def create_user_item(user_id: int, item: None, db: Session):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def get_user_item(user_id: int, db: Session):
+    return db.query(models.Item).filter(models.Item.owner_id == user_id).all()
+
+
+def get_user_item_id(user_id: int, item_id: int, db: Session):
+    return db.query(models.Item).filter(models.Item.owner_id == user_id).filter(models.Item.id == item_id).first()
+
+
+def put_user_item_id(user_id: int, item_id: int, title: str, description: str, db: Session):
+    item = db.query(models.Item).filter(models.Item.owner_id == user_id).filter(models.Item.id == item_id).first()
+    if item:
+        item.title = title
+        item.description = description
+        db.commit()
+        raise HTTPException(status_code=200, detail="Update Item Success.")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found.")
+
+
+def delete_user_item(user_id: int, item_id: int, db: Session):
+    item = db.query(models.Item).filter(models.Item.owner_id == user_id).filter(models.Item.id == item_id).first()
+    if item:
+        db.delete(item)
+        db.commit()
+        raise HTTPException(status_code=200, detail="Delete Item Success.")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found.")
