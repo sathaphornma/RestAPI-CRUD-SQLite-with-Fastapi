@@ -5,13 +5,31 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import crud
 import schemas
+from routers import users
+
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+]
 
 app = FastAPI(
     title="Authentication with FastAPI.",
     description="This is mini project for create RestAPI, So I will create authentication with fastapi. This project "
                 "using sqlite for database.",
-    version="1.0.1",
+    version="2.0.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(users.router)
 
 
 @app.post("/token", response_model=schemas.Token)
@@ -30,7 +48,6 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# เพิ่ม user ใหม่
 @app.post("/sign-up/", response_model=schemas.User)
 def sign_up(user: schemas.UserInDB, db: Session = Depends(crud.get_db)):
     # print(user)
@@ -43,18 +60,3 @@ def sign_up(user: schemas.UserInDB, db: Session = Depends(crud.get_db)):
     else:
         crud.create_user(db=db, user=user)
         raise HTTPException(status_code=200, detail="Sign Up Success.")
-
-
-@app.get("/users/me/")
-async def read_users_me(current_user: schemas.User = Depends(crud.get_current_active_user)):
-    return current_user
-
-
-@app.get("/users/me/items/")
-async def read_own_items(current_user: schemas.User = Depends(crud.get_current_active_user)):
-    return [{"Item ID": "IT001", "Owner": current_user.username}]
-
-
-@app.post("/users/me/create-items", response_model=schemas.Item)
-def create_item_for_user(item: schemas.ItemCreate, current_user: schemas.User = Depends(crud.get_current_active_user), db: Session = Depends(crud.get_db)):
-    return crud.create_user_item(user_id=current_user.id, item=item, db=db)
