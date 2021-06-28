@@ -135,11 +135,19 @@ def create_user_item(user_id: int, item: None, db: Session):
 
 
 def get_user_item(user_id: int, db: Session):
-    return db.query(models.Item).filter(models.Item.owner_id == user_id).all()
+    items = db.query(models.Item).filter(models.Item.owner_id == user_id).all()
+    if items:
+        return items
+    else:
+        raise HTTPException(status_code=404, detail="Items not found.")
 
 
 def get_user_item_id(user_id: int, item_id: int, db: Session):
-    return db.query(models.Item).filter(models.Item.owner_id == user_id).filter(models.Item.id == item_id).first()
+    item = db.query(models.Item).filter(models.Item.owner_id == user_id).filter(models.Item.id == item_id).first()
+    if item:
+        return item
+    else:
+        raise HTTPException(status_code=404, detail="Item not found.")
 
 
 def put_user_item_id(user_id: int, item_id: int, title: str, description: str, db: Session):
