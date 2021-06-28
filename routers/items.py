@@ -1,7 +1,6 @@
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
-import crud
-import schemas
+from Core import schemas, crud
 
 router = APIRouter(
     prefix="/items",

@@ -3,8 +3,7 @@ from datetime import timedelta
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-import crud
-import schemas
+from Core import schemas, crud
 
 router = APIRouter(
     prefix="",
